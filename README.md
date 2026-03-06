@@ -24,3 +24,22 @@ physical core vs separate cores.
 
 Demonstrates performance degradation caused by
 cache line contention.
+
+## CPU stress test
+
+Resources data:
+```
+sudo gnome-system-monitor
+```
+
+Create stress for cpu
+```
+stress-ng --taskset 0,2-3 --cpu 3 --timeout 1m
+// --taskset: pin to CPU
+// --cpu: instances
+// --timeout: stressing time 
+
+stress-ng --cpu 8 --cpu-load 80 --timeout 1m
+// --cpu-load: % of loading
+```
+
