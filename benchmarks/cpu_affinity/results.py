@@ -30,6 +30,7 @@ plt.title("Unpinned")
 plt.yscale("log")
 plt.xlabel("Latency")
 plt.ylabel("Count")
+plt.xlim(0, np.percentile(lat_unique_unpinned, 99.9))
 
 lat_unique_pinned, counts_pinned = np.unique(latencies_pinned, return_counts=True)
 
@@ -39,5 +40,6 @@ plt.title("Pinned")
 plt.yscale("log")
 plt.xlabel("Latency")
 plt.ylabel("Count")
+plt.xlim(0, np.percentile(lat_unique_pinned, 99.9))
 
 plt.show()
