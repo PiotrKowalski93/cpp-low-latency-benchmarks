@@ -11,20 +11,36 @@ namespace Queue {
         BUY = 2
     };
 
-    //TODO: allign data for cache
-    struct MarketDataMessage{
-            uint32_t price_;
-            uint64_t timestamp_;
-            uint32_t symbol_id_;
-            uint32_t quantity_;
-            Side side_;
-        };
+    struct MarketDataMessageV1{
+        uint32_t price_;        // 4 byte
+        uint64_t timestamp_;    // 8 byte
+        Side side_;             // 4 byte
+        uint32_t symbol_id_;    // 4 byte
+        uint32_t quantity_;     // 4 byte      
+    };
+    
+    struct MarketDataMessageV2{
+        uint64_t timestamp_;    // 8 byte
+        uint32_t price_;        // 4 byte
+        uint32_t symbol_id_;    // 4 byte
+        uint32_t quantity_;     // 4 byte
+        Side side_;             // 4 byte
+    };
+
+    #pragma pack(push, 1)
+    struct MarketDataMessagePacked{
+        uint64_t timestamp_;    // 8 byte
+        uint32_t price_;        // 4 byte
+        uint32_t symbol_id_;    // 4 byte
+        uint32_t quantity_;     // 4 byte
+        Side side_;             // 4 byte
+    };
+    #pragma pack(pop)
 
     //SPSC Lock Free Queue
     template<typename T>
     class LockFreeQueue {
         public:
-
             LockFreeQueue(size_t buffer_size){
                 buffer_.reserve(buffer_size);
             }
