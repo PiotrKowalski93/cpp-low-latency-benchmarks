@@ -12,11 +12,11 @@ namespace Queue {
     };
 
     struct MarketDataMessageV1{
-        uint32_t price_;        // 4 byte
-        uint64_t timestamp_;    // 8 byte
-        Side side_;             // 4 byte
-        uint32_t symbol_id_;    // 4 byte
-        uint32_t quantity_;     // 4 byte      
+        uint32_t price_;            // 4 byte
+        uint64_t timestamp_send_;   // 8 byte
+        Side side_;                 // 4 byte
+        uint32_t symbol_id_;        // 4 byte
+        uint32_t quantity_;         // 4 byte      
     };
     
     struct MarketDataMessageV2{
@@ -36,6 +36,11 @@ namespace Queue {
         Side side_;             // 4 byte
     };
     #pragma pack(pop)
+
+    struct Message {
+        std::chrono::steady_clock::time_point start;
+        int data;
+    };
 
     //SPSC Lock Free Queue
     template<typename T>

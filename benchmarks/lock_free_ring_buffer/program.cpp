@@ -5,6 +5,10 @@
 
 using namespace Queue;
 
+// TODO: For Later measure cycles
+// #include <x86intrin.h>
+// uint64_t t = __rdtsc();
+
 int main() {
     
     size_t WARMUP_N_ = 10'000;
