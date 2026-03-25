@@ -20,11 +20,11 @@ namespace Queue {
     };
     
     struct MarketDataMessageV2{
-        uint64_t timestamp_;    // 8 byte
-        uint32_t price_;        // 4 byte
-        uint32_t symbol_id_;    // 4 byte
-        uint32_t quantity_;     // 4 byte
-        Side side_;             // 4 byte
+        uint64_t timestamp_send_;   // 8 byte
+        uint32_t price_;            // 4 byte
+        uint32_t symbol_id_;        // 4 byte
+        uint32_t quantity_;         // 4 byte
+        Side side_;                 // 4 byte
     };
 
     #pragma pack(push, 1)

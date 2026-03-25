@@ -1,7 +1,7 @@
 #pragma once
 
 #include <queue.h>
-
+    
 // This will show us how to optimize size of the object 
 // and memory alligment, CPU reading word size can read more msg's
 namespace Queue{
@@ -13,7 +13,7 @@ namespace Queue{
 
     }
 
-    auto PrintSizeofV2(MarketDataMessagePacked msg){
+    auto PrintSizeofPacked(MarketDataMessagePacked msg){
 
     }
 }
