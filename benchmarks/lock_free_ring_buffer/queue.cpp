@@ -14,7 +14,7 @@ namespace Queue{
         }
         
         buffer_[write_index] = element;
-        write_i.store(new_write_index, std::memory_order_release) // release <-- data is ready to use
+        write_i.store(new_write_index, std::memory_order_release); // release <-- data is ready to use
 
         return true;
     }
@@ -29,5 +29,15 @@ namespace Queue{
 
         element = buffer_[read_index];
         read_i.store((read_index + 1) % 2, std::memory_order_release);
+    }
+
+    template<typename T>
+    bool LockFreeQueue<T>::is_empty() noexcept {
+        size_t read_index = read_i.load(std::memory_order_acquire);
+
+        if(read_index == write_i.load(std::memory_order_acquire)){
+            return true;
+        }
+        return false;
     }
 }

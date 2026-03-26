@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <vector>
 #include <atomic>
+#include <chrono>
 
 namespace Queue {
     enum class Side {
@@ -52,6 +53,7 @@ namespace Queue {
 
             bool read(T& element) noexcept;
             bool write(const T& element) noexcept;
+            bool is_empty() noexcept;
 
         private:
             // vector => Cache line friendly

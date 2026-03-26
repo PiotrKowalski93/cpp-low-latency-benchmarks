@@ -11,6 +11,7 @@ add_executable (cpu_affinity
 )
 
 add_executable (queues 
+    benchmarks/lock_free_ring_buffer/queue.cpp
     benchmarks/lock_free_ring_buffer/program.cpp
 )
 
