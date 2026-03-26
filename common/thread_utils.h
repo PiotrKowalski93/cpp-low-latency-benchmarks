@@ -16,7 +16,7 @@ namespace Common
     }
 
     template<typename T, typename... A>
-    inline auto createAndStartThread(int core_id, const std::string &name, T &&func, A &&... args) noexcept{
+    inline std::thread* createAndStartThread(int core_id, const std::string &name, T &&func, A &&... args) noexcept{
         std::atomic<bool> running(false);
         std::atomic<bool> failed(false);
 

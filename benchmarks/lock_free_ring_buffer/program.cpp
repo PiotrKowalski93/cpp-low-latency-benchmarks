@@ -3,6 +3,7 @@
 #include <thread>
 
 #include "queue.h"
+#include "thread_utils.h"
 
 using namespace Queue;
 
@@ -14,6 +15,7 @@ int main() {
     
     size_t WARMUP_N_ = 10'000;
     size_t BENCHMARK_N_ = 200'000;
+    
     bool production_finished_ = false;
     size_t failed_write_ = 0;
     size_t failed_read_ = 0;
@@ -49,7 +51,7 @@ int main() {
     // Consumer
     auto consumer_func = [&](bool is_warmup){
         while (!production_finished_ || !messages_queue_.is_empty())
-        {
+        {   
             // Consume 
             Message msg;
             auto result = messages_queue_.read(msg);
@@ -63,25 +65,34 @@ int main() {
                     latencies_.push_back(latency);
                 }
             }
+            else {
+                failed_read_++;
+            }
         }
     };
 
     // Warmup
-    std::thread consumer_warmup(consumer_func, true);
-    std::thread producer_warmup(producer_func, WARMUP_N_);
+    std::cout << "---------- Warmup ----------" << std::endl;
+    auto producer_warmup = Common::createAndStartThread(3, "Consumer", consumer_func, true);
+    auto consumer_warmup = Common::createAndStartThread(2, "Producer", producer_func, WARMUP_N_);
 
-    producer_warmup.join();
-    consumer_warmup.join();
+    producer_warmup->join();
+    consumer_warmup->join();
 
     // Benchmark
-    std::thread consumer_(consumer_func, false);
-    std::thread producer_(producer_func, BENCHMARK_N_);
+    std::cout << "---------- Benchmark ----------" << std::endl;
 
-    producer_.join();
-    producer_.join();
+    production_finished_ = false;
+
+    auto producer_ = Common::createAndStartThread(3, "Consumer", consumer_func, false);
+    auto consumer_ = Common::createAndStartThread(2, "Producer", producer_func, BENCHMARK_N_);
+
+    producer_->join();
+    consumer_->join();
     
     std::cout << "Finished benchmark" << std::endl;
-    std::cout << "Results:" << std::endl;
+    std::cout << "Latencies count:" << latencies_.size() << std::endl;
+    std::cout << "Failed write:" << failed_write_ << std::endl;
 
     // Print out:
     // CPUs GHz
