@@ -20,7 +20,7 @@ int main() {
 
     std::vector<std::chrono::nanoseconds> latencies_;
     
-    Queue::LockFreeQueue<Message> messages_queue_(BENCHMARK_N_);
+    Queue::LockFreeQueue<Queue::Message> messages_queue_(BENCHMARK_N_);
 
     // ----------------------------------------
     // Run producer and consumer in different threads
