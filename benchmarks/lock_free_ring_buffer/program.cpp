@@ -3,6 +3,7 @@
 #include <thread>
 #include <algorithm>
 #include <numeric>
+#include <immintrin.h>
 
 #include "queue.h"
 #include "thread_utils.h"
@@ -16,6 +17,7 @@ using namespace Queue;
 // TODO: Add CPU isolation, CPU pinning might not be enought
 // TODO: Add Priority to the thread
 // TODO: Add _mm_pause()?
+// TODO: Page faults - prefaulting?
 int main() {
     
     size_t WARMUP_N_ = 10'000;
@@ -44,12 +46,10 @@ int main() {
             Message msg;
             msg.data = 1;
             msg.start = std::chrono::steady_clock::now();
-            messages_queue_.write(msg);
-
-            // Write to buffer
-            // if(!messages_queue_.write(msg)){
-            //     failed_write_++;
-            // }
+            
+            while (!messages_queue_.write(msg)) {
+                _mm_pause();
+            }
         }
 
         production_finished_ = true;
