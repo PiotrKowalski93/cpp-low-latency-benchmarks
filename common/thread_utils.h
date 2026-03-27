@@ -46,10 +46,13 @@ namespace Common
         };
 
         auto t = new std::thread(thread_body);
-        // while(!running && !failed){
-        //     using namespace std::literals::chrono_literals;
-        //     std::this_thread::sleep_for(1ms);
-        // }
+
+        // Waiting so cpu can be pinned
+        // without this, pinned to 0
+        while(!running && !failed){
+            using namespace std::literals::chrono_literals;
+            std::this_thread::sleep_for(1ns);
+        }
 
         if (failed){
             t->join();

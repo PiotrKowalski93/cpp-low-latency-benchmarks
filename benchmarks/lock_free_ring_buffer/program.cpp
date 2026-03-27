@@ -10,19 +10,62 @@
 
 using namespace Queue;
 
-// TODO: For Later measure cycles
-// #include <x86intrin.h>
-// uint64_t t = __rdtsc();
+size_t WARMUP_N_ = 10'000;
+size_t BENCHMARK_N_ = 1'000'000;
 
-// TODO: Add CPU isolation, CPU pinning might not be enought
-// TODO: Add Priority to the thread
-// TODO: Add _mm_pause()?
-// TODO: Page faults - prefaulting?
-int main() {
-    
-    size_t WARMUP_N_ = 10'000;
-    size_t BENCHMARK_N_ = 1'000'000;
-    
+auto run_micro_benchmark(){
+
+    Queue::LockFreeQueue<Queue::Message> messages_queue_(BENCHMARK_N_);
+
+    std::vector<std::chrono::nanoseconds> micro_latencies_;
+    micro_latencies_.reserve(BENCHMARK_N_);
+
+    // Microbenchmark
+    // Warmup
+    Message msg{}, readed{};
+
+    for (size_t i = 0; i < WARMUP_N_; ++i) {
+        messages_queue_.write(msg);
+        messages_queue_.read(readed);
+    }
+
+    // Benchmark
+    for (size_t i = 0; i < BENCHMARK_N_; ++i) {
+        auto start = std::chrono::steady_clock::now();
+        
+        messages_queue_.write(msg);
+        messages_queue_.read(readed);
+        
+        auto end = std::chrono::steady_clock::now();
+        micro_latencies_.push_back(end - start);
+    }
+
+    // Calculate
+    std::cout << "------------ Results -------------" << std::endl;
+
+    sort(micro_latencies_.begin(), micro_latencies_.end());
+    auto sum = std::reduce(micro_latencies_.begin(), micro_latencies_.end());
+    auto avg_latency = sum / micro_latencies_.size();
+
+    std::cout << "Total processed:" << micro_latencies_.size() << std::endl;
+
+    std::cout << "Min Latency: " << micro_latencies_.front() << std::endl;
+    std::cout << "Avg Latency: " << avg_latency << std::endl;
+    std::cout << "Max Latency: " << micro_latencies_.back() << std::endl;
+
+    auto p50 = micro_latencies_[BENCHMARK_N_ * 0.5];
+    auto p90 = micro_latencies_[BENCHMARK_N_ * 0.9];
+    auto p99 = micro_latencies_[BENCHMARK_N_ * 0.99];
+    auto p999 = micro_latencies_[BENCHMARK_N_ * 0.999];
+
+    std::cout << std::endl;
+    std::cout << "p50: " << p50 << std::endl;
+    std::cout << "p90: " << p90 << std::endl;
+    std::cout << "p99: " << p99 << std::endl;
+    std::cout << "p999: " << p999 << std::endl;
+}
+
+auto run_two_threads_benchmark(){
     bool production_finished_ = false;
     size_t failed_write_ = 0;
     size_t failed_read_ = 0;
@@ -48,7 +91,7 @@ int main() {
             msg.start = std::chrono::steady_clock::now();
             
             while (!messages_queue_.write(msg)) {
-                _mm_pause();
+                std::this_thread::yield();
             }
         }
 
@@ -68,6 +111,8 @@ int main() {
                 auto end = std::chrono::steady_clock::now();
                 auto latency = end - msg.start;
                 latencies_.push_back(latency);
+            }else{
+                std::this_thread::yield();
             }
         }
     };
@@ -115,6 +160,17 @@ int main() {
     std::cout << "p90: " << p90 << std::endl;
     std::cout << "p99: " << p99 << std::endl;
     std::cout << "p999: " << p999 << std::endl;
+}
+
+// TODO: For Later measure cycles
+// #include <x86intrin.h>
+// uint64_t t = __rdtsc();
+
+// TODO: Add CPU isolation, CPU pinning might not be enought
+// TODO: Add Priority to the thread
+// TODO: Page faults - prefaulting?
+int main() {
+    
 
     return 0;
 }
