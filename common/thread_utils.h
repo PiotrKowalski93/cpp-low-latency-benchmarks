@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <pthread.h>
 
 namespace Common
 {
@@ -15,6 +16,14 @@ namespace Common
         return (pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset) == 0);
     }
 
+    inline int setThreadPriority() {
+        sched_param param{};
+        param.sched_priority = 70; // 1 - 99
+        int policy = SCHED_FIFO;
+
+        return pthread_setschedparam(pthread_self(), policy, &param);
+    }
+
     template<typename T, typename... A>
     inline std::thread* createAndStartThread(int core_id, const std::string &name, T &&func, A &&... args) noexcept{
         std::atomic<bool> running(false);
@@ -27,17 +36,20 @@ namespace Common
                 return;
             }
             std::cerr << "Set core affinity for " << name << " " << pthread_self() << " to " << core_id << std::endl;
-            
+
+            // if (setThreadPriority() != 0) {
+            //     perror("pthread_setschedparam failed");
+            // }
+
             running = true;
             std::forward<T>(func)(std::forward<A>(args)...);
         };
 
         auto t = new std::thread(thread_body);
-
-        while(!running && !failed){
-            using namespace std::literals::chrono_literals;
-            std::this_thread::sleep_for(1ms);
-        }
+        // while(!running && !failed){
+        //     using namespace std::literals::chrono_literals;
+        //     std::this_thread::sleep_for(1ms);
+        // }
 
         if (failed){
             t->join();

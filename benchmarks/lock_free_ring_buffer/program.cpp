@@ -21,7 +21,7 @@ using namespace Queue;
 int main() {
     
     size_t WARMUP_N_ = 10'000;
-    size_t BENCHMARK_N_ = 200'000;
+    size_t BENCHMARK_N_ = 1'000'000;
     
     bool production_finished_ = false;
     size_t failed_write_ = 0;
