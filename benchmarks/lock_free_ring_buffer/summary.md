@@ -13,7 +13,7 @@ p999: 1181ns
 
 ### Throughput
 
-
+TODO: Measue producer and consumer throughput on 10M messages 
 
 ### End-to-end latency
 
