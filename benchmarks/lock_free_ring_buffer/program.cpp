@@ -65,7 +65,7 @@ auto run_micro_benchmark(){
     std::cout << "p999: " << p999 << std::endl;
 }
 
-auto run_two_threads_benchmark(){
+auto run_two_threads_benchmark(size_t queue_size){
     bool production_finished_ = false;
     size_t failed_write_ = 0;
     size_t failed_read_ = 0;
@@ -73,7 +73,7 @@ auto run_two_threads_benchmark(){
     std::vector<std::chrono::nanoseconds> latencies_;
     latencies_.reserve(BENCHMARK_N_);
     
-    Queue::LockFreeQueue<Queue::Message> messages_queue_(BENCHMARK_N_);
+    Queue::LockFreeQueue<Queue::Message> messages_queue_(queue_size);
 
     // ----------------------------------------
     // Run producer and consumer in different threads
@@ -91,7 +91,6 @@ auto run_two_threads_benchmark(){
             msg.start = std::chrono::steady_clock::now();
             
             while (!messages_queue_.write(msg)) {
-                std::this_thread::yield();
             }
         }
 
@@ -111,8 +110,6 @@ auto run_two_threads_benchmark(){
                 auto end = std::chrono::steady_clock::now();
                 auto latency = end - msg.start;
                 latencies_.push_back(latency);
-            }else{
-                std::this_thread::yield();
             }
         }
     };
@@ -171,6 +168,11 @@ auto run_two_threads_benchmark(){
 // TODO: Page faults - prefaulting?
 int main() {
     
-
+    run_two_threads_benchmark(1000);
+    run_two_threads_benchmark(4000);
+    run_two_threads_benchmark(16000);
+    run_two_threads_benchmark(64000);
+    run_two_threads_benchmark(256000);
+    run_two_threads_benchmark(1'000'000);
     return 0;
 }

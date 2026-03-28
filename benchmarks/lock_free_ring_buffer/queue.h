@@ -38,9 +38,9 @@ namespace Queue {
     };
     #pragma pack(pop)
 
-    struct Message {
-        std::chrono::steady_clock::time_point start;
-        int data;
+    struct Message { // 16 b
+        std::chrono::steady_clock::time_point start;    // 8B
+        int data;                                       // 4B + 4B padding
     };
 
     //SPSC Lock Free Queue
