@@ -19,6 +19,7 @@ TODO: Measue producer and consumer throughput on 10M messages
 
 Latencies between queuing a message and consuming it.
 
+```
 Min Latency: 182ns
 Avg Latency: 132285ns
 Max Latency: 174231ns
@@ -27,3 +28,4 @@ p50: 131191ns
 p90: 148598ns
 p99: 155441ns
 p999: 167486ns
+```
