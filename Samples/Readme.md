@@ -1,3 +1,7 @@
+
+### Benchmark for AVX2
+
+```bash
 Run on (4 X 2808 MHz CPU s)
 CPU Caches:
   L1 Data 32 KiB (x2)
@@ -31,3 +35,4 @@ BM_DotProduct_AVX2/1024                         143 ns          143 ns      4942
 BM_DotProduct_AVX2/4096                         636 ns          636 ns      1064571 items_per_second=6.44106G/s
 BM_DotProduct_AVX2/16384                       2666 ns         2666 ns       270999 items_per_second=6.14659G/s
 BM_DotProduct_AVX2/65536                      10531 ns        10530 ns        56435 items_per_second=6.22345G/s
+```
