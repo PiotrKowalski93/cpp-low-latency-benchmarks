@@ -23,6 +23,7 @@ target_include_directories(matrix_simd PRIVATE
 target_compile_options(matrix_simd PRIVATE
     -O3
     -mavx2
+    -mfma
 )
 
 # --------------------------------------------------
@@ -59,4 +60,5 @@ target_link_libraries(dot_product_benchmark PRIVATE
 target_compile_options(dot_product_benchmark PRIVATE
     -O3
     -mavx2
+    -mfma
 )

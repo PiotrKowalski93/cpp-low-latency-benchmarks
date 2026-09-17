@@ -103,3 +103,95 @@ float dot_product_avx2(const float* a, const float* b, std::size_t n) noexcept
 
     return total;
 }
+
+float dot_product_avx2_fma_one_accumulator(const float* a, const float* b, std::size_t n) noexcept {
+    __m256 sum = _mm256_setzero_ps();
+
+    std::size_t i = 0;
+
+    // Only one accumulator
+    for (; i + 8 <= n; i += 8) {
+        __m256 a_vec = _mm256_loadu_ps(a + i);
+        __m256 b_vec = _mm256_loadu_ps(b + i);
+
+        sum = _mm256_fmadd_ps(a_vec, b_vec, sum);
+    }
+
+    // Moves result to table 
+    float result[8];
+    _mm256_storeu_ps(result, sum);
+
+    float total = 0.0f;
+
+    // Compiler takes care of unrolling it
+    // we need to sum product of simd
+    for (int j = 0; j < 8; ++j) {
+        total += result[j];
+    }
+
+    for (; i < n; ++i) {
+        total += a[i] * b[i];
+    }
+
+    return total;
+}
+
+float dot_product_avx2_fma_four_accumulators(const float* a, const float* b, std::size_t n) noexcept {
+    __m256 sum0 = _mm256_setzero_ps();
+    __m256 sum1 = _mm256_setzero_ps();
+    __m256 sum2 = _mm256_setzero_ps();
+    __m256 sum3 = _mm256_setzero_ps();
+
+    std::size_t i = 0;
+
+    for (; i + 32 <= n; i += 32) {
+        sum0 = _mm256_fmadd_ps(
+            _mm256_loadu_ps(a + i),
+            _mm256_loadu_ps(b + i),
+            sum0);
+
+        sum1 = _mm256_fmadd_ps(
+            _mm256_loadu_ps(a + i + 8),
+            _mm256_loadu_ps(b + i + 8),
+            sum1);
+
+        sum2 = _mm256_fmadd_ps(
+            _mm256_loadu_ps(a + i + 16),
+            _mm256_loadu_ps(b + i + 16),
+            sum2);
+
+        sum3 = _mm256_fmadd_ps(
+            _mm256_loadu_ps(a + i + 24),
+            _mm256_loadu_ps(b + i + 24),
+            sum3);
+    }
+
+    sum0 = _mm256_add_ps(sum0, sum1);
+    sum2 = _mm256_add_ps(sum2, sum3);
+    sum0 = _mm256_add_ps(sum0, sum2);
+
+    // __m256 to float value
+    // __m256 = [x0 x1 x2 x3 x4 x5 x6 x7]
+    // low  = [x0 x1 x2 x3]
+    // high = [x4 x5 x6 x7]
+    // sum128 = [x0+x4, x1+x5, x2+x6, x3+x7]
+
+    __m128 low  = _mm256_castps256_ps128(sum0);
+    __m128 high = _mm256_extractf128_ps(sum0, 1);
+
+    __m128 sum128 = _mm_add_ps(low, high);
+
+    //     [x0+x4 x1+x5 x2+x6 x3+x7]
+    //         ↓ _mm_hadd_ps
+    //     [x0+x4+x1+x5  x2+x6+x3+x7]
+    sum128 = _mm_hadd_ps(sum128, sum128);
+
+    //   [x0+x4+x1+x5  x2+x6+x3+x7 ...]
+    //        ↓ _mm_hadd_ps
+    //   [x0+x1+x2+x3+x4+x5+x6+x7 ...]
+    sum128 = _mm_hadd_ps(sum128, sum128);
+
+    float result = _mm_cvtss_f32(sum128);
+
+    return result;
+}
